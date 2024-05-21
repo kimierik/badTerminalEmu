@@ -1,0 +1,5 @@
+(executable
+ (public_name typingthing)
+ (name main)
+ (foreign_stubs (language c) (names stubs))
+ (libraries typingthing raylib unix))
