@@ -20,10 +20,9 @@ let int_of_fd (x: Unix.file_descr) : int = Obj.magic x;;
 
 let readpout pty =
     let buffer=Bytes.create 1024 in
-
     match Unix.read pty.controller_fd buffer 0 1024 with
     | 0  -> ()
-    | -1 -> exit 1
+    | -1 -> ()
     | bytes_written  -> print_endline (Bytes.sub_string buffer 0 bytes_written); 
     ()
 
@@ -31,11 +30,7 @@ let readpout pty =
 let execute_command pty command=
     let writecommand =(String.lowercase_ascii (String.cat command "\n")) in
     let bytes =Bytes.of_string  writecommand in
-    let w =Unix.write pty.controller_fd bytes 0 (Bytes.length bytes) in
-    if w > 0 then 
-        readpout pty; 
-        readpout pty;
-        readpout pty;
+    Unix.write pty.controller_fd bytes 0 (Bytes.length bytes);; 
     ()
 
 

@@ -32,18 +32,25 @@ let mutate_text state=
         | 257 -> let _ =Term.execute_command state.pty state.text in{text="";pty=state.pty}
         |_ ->state
         
-
+let tryread state =
+    try Term.readpout state.pty;()
+    with (Unix.Unix_error (Unix.EAGAIN, "read", "") ) -> (); 
+    ()
+        
+    
 
 let rec loop state =
   if Raylib.window_should_close () then Raylib.close_window ()
   else
     let open Raylib in
+    tryread state;
 
     begin_drawing ();
     clear_background Color.black;
     draw_text state.text 190 200 20
       Color.white;
     end_drawing ();
+
     state |> mutate_text |> loop 
 
 
@@ -58,8 +65,7 @@ let child state=
 
 let setup_parent_process state =
     Term.setup_controller state.pty; 
-    Unix.sleep 2;
-    Term.readpout state.pty;
+    Unix.set_nonblock state.pty.controller_fd;
     state |>game;
     ()
 
